@@ -49,6 +49,7 @@ def main():
     ap.add_argument("--rerank")
     ap.add_argument("--rerank-top", type=int, default=20)
     ap.add_argument("--max-queries", type=int)
+    ap.add_argument("--dims", default="", help="also score Matryoshka-truncated embeddings, e.g. 512,1024 (no extra model work)")
     ap.add_argument("--max-pages", type=int, help="smoke tests only: keep the first N pages (scores are then not comparable)")
     ap.add_argument("--cache", default=os.path.join(HERE, "results", "emb-cache"))
     ap.add_argument("--out", required=True)
@@ -83,6 +84,11 @@ def main():
     first = [[ids[j] for j in row] for row in top]
     res["ndcg@10"] = round(float(np.mean([ndcg_at(r, qrels[q]) for r, (q, _) in zip(first, queries)])), 5)
     res["recall@100"] = round(float(np.mean([recall_at(r, qrels[q]) for r, (q, _) in zip(first, queries)])), 4)
+    for k in [int(x) for x in a.dims.split(",") if x]:
+        Dk = D[:, :k] / np.linalg.norm(D[:, :k], axis=1, keepdims=True)
+        Qk = Q[:, :k] / np.linalg.norm(Q[:, :k], axis=1, keepdims=True)
+        tk = np.argsort(-(Qk @ Dk.T), axis=1)[:, :10]
+        res[f"ndcg@10_dim{k}"] = round(float(np.mean([ndcg_at([ids[j] for j in r], qrels[q]) for r, (q, _) in zip(tk, queries)])), 5)
     print(json.dumps(res), flush=True)
     if a.rerank:
         del e
