@@ -36,14 +36,16 @@ def load_beir(name):
     qtext = dict(zip(q["_id"].astype(str), q["text"]))
     qids = sorted(qid for qid in qrels if qid in qtext)
     dids = c["_id"].astype(str).tolist()
-    dtext = [(t + "\n" + x).strip() if isinstance(t, str) and t else str(x) for t, x in zip(c["title"], c["text"])]
+    txt = [x if isinstance(x, str) else "" for x in c["text"]]
+    dtext = [(t + "\n" + x).strip() if isinstance(t, str) and t else x for t, x in zip(c["title"], txt)]
     return qids, [qtext[i] for i in qids], dids, dtext, qrels
 
 
 def ndcg_at(ranked, rel, k=10):
-    dcg = sum((2 ** rel.get(d, 0) - 1) / math.log2(i + 2) for i, d in enumerate(ranked[:k]))
+    """nDCG@k with linear gains, as trec_eval / pytrec_eval (and so MTEB) compute it."""
+    dcg = sum(rel.get(d, 0) / math.log2(i + 2) for i, d in enumerate(ranked[:k]))
     ideal = sorted(rel.values(), reverse=True)[:k]
-    idcg = sum((2 ** r - 1) / math.log2(i + 2) for i, r in enumerate(ideal))
+    idcg = sum(r / math.log2(i + 2) for i, r in enumerate(ideal))
     return dcg / idcg if idcg else 0.0
 
 
@@ -58,6 +60,7 @@ def main():
     ap.add_argument("--rerank")
     ap.add_argument("--rerank-top", type=int, default=100)
     ap.add_argument("--max-queries", type=int)
+    ap.add_argument("--max-docs", type=int, help="score on a slice: the selected queries' relevant documents plus random others up to N (a quick relative check; not comparable to full-corpus scores)")
     ap.add_argument("--dim", type=int)
     ap.add_argument("--max-doc-tokens", type=int, default=8192, help="documents are cut to this many tokens (the cards allow 32K)")
     ap.add_argument("--cache", default=os.path.join(HERE, "results", "emb-cache"))
@@ -67,9 +70,16 @@ def main():
     qids, qtexts, dids, dtexts, qrels = load_beir(a.dataset)
     if a.max_queries:
         qids, qtexts = qids[:a.max_queries], qtexts[:a.max_queries]
+    if a.max_docs and a.max_docs < len(dids):
+        import random
+        keep = {d for q in qids for d in qrels[q]}
+        rest = [i for i, d in enumerate(dids) if d not in keep]
+        random.Random(7).shuffle(rest)
+        idx = sorted([i for i, d in enumerate(dids) if d in keep] + rest[:max(0, a.max_docs - len(keep))])
+        dids, dtexts = [dids[i] for i in idx], [dtexts[i] for i in idx]
     res = {"dataset": a.dataset, "embed": a.embed, "queries": len(qids), "docs": len(dids)}
     os.makedirs(a.cache, exist_ok=True)
-    key = hashlib.sha1(f"{a.dataset}|{os.path.abspath(a.embed)}|{a.max_doc_tokens}".encode()).hexdigest()[:12]
+    key = hashlib.sha1(f"{a.dataset}|{os.path.abspath(a.embed)}|{a.max_doc_tokens}|{len(dids)}|{a.max_queries}".encode()).hexdigest()[:12]
     cpath = os.path.join(a.cache, f"{a.dataset}-{key}.npz")
     e = Embedder(a.embed)
     cut = []
@@ -106,7 +116,7 @@ def main():
         for qt, row in zip(qtexts, top):
             cand = row[:a.rerank_top]
             s = r.score(qt, [cut[j] for j in cand])
-            reranked.append([dids[cand[i]] for i in np.argsort(-s)])
+            reranked.append([dids[cand[i]] for i in np.argsort(-s)] + [dids[j] for j in row[a.rerank_top:]])
         res.update(rerank=a.rerank, rerank_top=a.rerank_top, rerank_s=round(time.time() - t1, 1),
                    **{"rerank_ndcg@10": round(float(np.mean([ndcg_at(rr, qrels[q]) for rr, q in zip(reranked, qids)])), 4)})
     json.dump(res, open(a.out, "w"), indent=1)
