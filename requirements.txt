@@ -1,0 +1,13 @@
+mlx==0.32.4
+mlx-lm==0.32.2
+transformers==5.20.0
+huggingface_hub
+numpy
+fastapi
+uvicorn
+# reference (parity.py) and benchmarks
+torch==2.14.0
+torchvision
+scipy
+pandas
+pillow
