@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nemotron-retrieval-mlx"
+version = "0.1.0"
+description = "NVIDIA Nemotron 3.5 Embed / Rerank (text and page images) on Apple Silicon with MLX"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [{name = "Paris Michalas (NetProjects)"}]
+dependencies = ["mlx>=0.32.4", "mlx-lm>=0.32.2", "mlx-vlm>=0.7.11", "transformers>=5.20.0", "huggingface_hub", "numpy", "pillow"]
+
+[project.optional-dependencies]
+server = ["fastapi", "uvicorn"]
+eval = ["torch", "torchvision", "scipy", "pandas", "pyarrow"]
+
+[tool.setuptools]
+packages = ["nemotron_mlx"]
