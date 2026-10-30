@@ -9,6 +9,7 @@ Run NVIDIA's Nemotron 3.5 retrieval models natively on a Mac with [MLX](https://
 | [nvidia/Nemotron-3.5-Rerank-8B-BF16](https://huggingface.co/nvidia/Nemotron-3.5-Rerank-8B-BF16) | reranker (relevance logit) | [8-bit](https://huggingface.co/netprojects/Nemotron-3.5-Rerank-8B-mlx-8bit) · [4-bit](https://huggingface.co/netprojects/Nemotron-3.5-Rerank-8B-mlx-4bit) |
 
 Built by [NetProjects](https://netprojects.com). Not affiliated with NVIDIA; the models are NVIDIA's, under the OpenMDW-1.1 licence.
+All NetProjects builds: [NetProjects MLX builds collection](https://huggingface.co/collections/netprojects/netprojects-mlx-builds-6ae3b2683a59a1b4fc4c0c3a).
 
 ## Install
 

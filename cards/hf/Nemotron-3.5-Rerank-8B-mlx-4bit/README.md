@@ -93,3 +93,5 @@ The model is NVIDIA's, released under the [OpenMDW License Agreement, version 1.
 - Built on [MLX](https://github.com/ml-explore/mlx), [mlx-lm](https://github.com/ml-explore/mlx-lm) and [mlx-vlm](https://github.com/Blaizzy/mlx-vlm)
 
 Built and tested on Apple M5 Max (128 GB) · upstream revision `f88f8d9104726747791283ab156d2fcdb29e90a7`
+
+**More NetProjects MLX builds:** [NetProjects MLX builds collection](https://huggingface.co/collections/netprojects/netprojects-mlx-builds-6ae3b2683a59a1b4fc4c0c3a) · [all models at huggingface.co/netprojects](https://huggingface.co/netprojects) · code: [internet-projects/nemotron-retrieval-mlx](https://github.com/internet-projects/nemotron-retrieval-mlx)

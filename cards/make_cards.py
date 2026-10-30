@@ -153,6 +153,8 @@ small = e.embed_queries(["…"], dim=512)                    # Matryoshka: short
     w("- MLX conversion and tests: Paris Michalas, Partner at [NetProjects](https://netprojects.com)")
     w("- Built on [MLX](https://github.com/ml-explore/mlx), [mlx-lm](https://github.com/ml-explore/mlx-lm) and [mlx-vlm](https://github.com/Blaizzy/mlx-vlm)\n")
     w(f"Built and tested on Apple M5 Max (128 GB) · upstream revision `{REV[model]}`")
+    w("\n**More NetProjects MLX builds:** [NetProjects MLX builds collection](https://huggingface.co/collections/netprojects/netprojects-mlx-builds-6ae3b2683a59a1b4fc4c0c3a)"
+      " · [all models at huggingface.co/netprojects](https://huggingface.co/netprojects) · code: [internet-projects/nemotron-retrieval-mlx](https://github.com/internet-projects/nemotron-retrieval-mlx)")
     return name, "\n".join(fm + b) + "\n"
 
 
